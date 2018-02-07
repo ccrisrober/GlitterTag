@@ -1,48 +1,86 @@
-// Local Headers
-#include "glitter.hpp"
-
 // System Headers
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-// Standard Headers
-#include <cstdio>
-#include <cstdlib>
+#include <iostream>
 
-int main(int argc, char * argv[]) {
+GLFWwindow* window;
 
-    // Load GLFW and Create a Window
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    auto mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL", nullptr, nullptr);
+void init( void );
+void loop( void );
 
-    // Check for Valid Context
-    if (mWindow == nullptr) {
-        fprintf(stderr, "Failed to Create OpenGL Context");
-        return EXIT_FAILURE;
+void run( void )
+{
+    init( );
+    loop( );
+
+    glfwTerminate( );
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, 
+    int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+}
+
+void init( void )
+{
+    // Initialize GLFW. Most GLFW functions will not work before doing this.
+    if ( !glfwInit( ) )
+    {
+        throw;
     }
 
-    // Create Context and Load OpenGL Functions
-    glfwMakeContextCurrent(mWindow);
+    // Configure GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+    // Create the window
+    window = glfwCreateWindow(800, 600, "Hello World!", nullptr, nullptr);
+    if (window == nullptr)
+    {
+        std::cerr << "Failed to create the GLFW window" << std::endl;
+        throw;
+    }
+
+    // Setup a key callback. It will be called every time a key is pressed, repeated or released.
+    glfwSetKeyCallback(window, key_callback);
+
+        // Make the OpenGL context current
+    glfwMakeContextCurrent(window);
+
+    // Enable v-sync
+    glfwSwapInterval(1);
+
+    // Make the window visible
+    glfwShowWindow(window);
+
     gladLoadGL();
-    fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
+}
 
-    // Rendering Loop
-    while (glfwWindowShouldClose(mWindow) == false) {
-        if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(mWindow, true);
+void loop( void )
+{
+    while (!glfwWindowShouldClose(window))
+    {
+        // Poll for window events. The key callback above will only be
+        // invoked during this call.
+        glfwPollEvents();
 
-        // Background Fill Color
-        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+        // render
+        // ------
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Flip Buffers and Draw
-        glfwSwapBuffers(mWindow);
-        glfwPollEvents();
-    }   glfwTerminate();
-    return EXIT_SUCCESS;
+        glfwSwapBuffers(window); // swap the color buffers
+    }
+}
+
+int main(int, char**)
+{
+    run( );
+
+    return 0;
 }
